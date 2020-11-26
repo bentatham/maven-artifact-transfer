@@ -60,8 +60,8 @@ class DefaultDependencyResolver implements DependencyResolver, Contextualizable
 
         try
         {
-            return getMavenDependencyResolver( buildingRequest ).resolveDependencies( coordinates, managedDependencies,
-                    filter );
+            return getMavenDependencyResolver( buildingRequest )
+                    .resolveDependencies( coordinates, managedDependencies, filter );
         }
         catch ( ComponentLookupException e )
         {
@@ -130,16 +130,15 @@ class DefaultDependencyResolver implements DependencyResolver, Contextualizable
     }
 
     private MavenDependencyResolver getMavenDependencyResolver( ProjectBuildingRequest buildingRequest )
-            throws ComponentLookupException, DependencyResolverException
+            throws ComponentLookupException
     {
         ArtifactHandlerManager artifactHandlerManager = container.lookup( ArtifactHandlerManager.class );
 
         RepositorySystem m31RepositorySystem = container.lookup( RepositorySystem.class );
 
-        RepositorySystemSession session = Invoker.invoke( buildingRequest, "getRepositorySession" );
+        RepositorySystemSession session = buildingRequest.getRepositorySession();
 
-        List<RemoteRepository> aetherRepositories = Invoker.invoke(
-                RepositoryUtils.class, "toRepos", List.class, buildingRequest.getRemoteRepositories() );
+        List<RemoteRepository> aetherRepositories = RepositoryUtils.toRepos( buildingRequest.getRemoteRepositories() );
 
         return new Maven31DependencyResolver( m31RepositorySystem, artifactHandlerManager, session,
                 aetherRepositories );

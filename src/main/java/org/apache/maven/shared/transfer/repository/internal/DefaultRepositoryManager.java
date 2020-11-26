@@ -19,8 +19,6 @@ package org.apache.maven.shared.transfer.repository.internal;
  * under the License.
  */
 
-import java.io.File;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -28,7 +26,6 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 import org.apache.maven.shared.transfer.artifact.ArtifactCoordinate;
 import org.apache.maven.shared.transfer.artifact.DefaultArtifactCoordinate;
 import org.apache.maven.shared.transfer.repository.RepositoryManager;
-import org.apache.maven.shared.transfer.repository.RepositoryManagerException;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.annotations.Component;
@@ -37,7 +34,8 @@ import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
+
+import java.io.File;
 
 /**
  * 
@@ -55,7 +53,7 @@ class DefaultRepositoryManager
         {
             return getMavenRepositoryManager( buildingRequest ).getPathForLocalArtifact( artifact );
         }
-        catch ( ComponentLookupException | RepositoryManagerException e )
+        catch ( ComponentLookupException e )
         {
             throw new IllegalStateException( e.getMessage(), e );
         }
@@ -68,7 +66,7 @@ class DefaultRepositoryManager
         {
             return getMavenRepositoryManager( buildingRequest ).getPathForLocalArtifact( coor );
         }
-        catch ( ComponentLookupException | RepositoryManagerException e )
+        catch ( ComponentLookupException e )
         {
             throw new IllegalStateException( e.getMessage(), e );
         }
@@ -91,7 +89,7 @@ class DefaultRepositoryManager
         {
             return getMavenRepositoryManager( buildingRequest ).getPathForLocalMetadata( metadata );
         }
-        catch ( ComponentLookupException | RepositoryManagerException e )
+        catch ( ComponentLookupException e )
         {
             throw new IllegalStateException( e.getMessage(), e );
         }
@@ -104,7 +102,7 @@ class DefaultRepositoryManager
         {
             return getMavenRepositoryManager( buildingRequest ).setLocalRepositoryBasedir( buildingRequest, basedir );
         }
-        catch ( ComponentLookupException | RepositoryManagerException e )
+        catch ( ComponentLookupException e )
         {
             throw new IllegalStateException( e.getMessage(), e );
         }
@@ -117,20 +115,18 @@ class DefaultRepositoryManager
         {
             return getMavenRepositoryManager( buildingRequest ).getLocalRepositoryBasedir();
         }
-        catch ( ComponentLookupException | RepositoryManagerException e )
+        catch ( ComponentLookupException e )
         {
             throw new IllegalStateException( e.getMessage(), e );
         }
     }
     
     private MavenRepositoryManager getMavenRepositoryManager( ProjectBuildingRequest buildingRequest )
-        throws ComponentLookupException, RepositoryManagerException
+        throws ComponentLookupException
     {
         RepositorySystem m31RepositorySystem = container.lookup( RepositorySystem.class );
 
-        RepositorySystemSession session = Invoker.invoke( buildingRequest, "getRepositorySession" );
-
-        return new Maven31RepositoryManager( m31RepositorySystem, session );
+        return new Maven31RepositoryManager( m31RepositorySystem, buildingRequest.getRepositorySession() );
     }
     
     public void contextualize( Context context ) throws ContextException

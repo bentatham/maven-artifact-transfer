@@ -19,8 +19,6 @@ package org.apache.maven.shared.transfer.dependencies.collect.internal;
  * under the License.
  */
 
-import java.util.List;
-
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.handler.manager.ArtifactHandlerManager;
 import org.apache.maven.model.Dependency;
@@ -38,8 +36,9 @@ import org.codehaus.plexus.context.Context;
 import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 import org.eclipse.aether.RepositorySystem;
-import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
+
+import java.util.List;
 
 /**
  * This DependencyCollector passes the request to the proper Maven 3.x implementation
@@ -145,19 +144,16 @@ class DefaultDependencyCollector implements DependencyCollector, Contextualizabl
     }
 
     private MavenDependencyCollector getMavenDependencyCollector( ProjectBuildingRequest buildingRequest )
-            throws ComponentLookupException, DependencyCollectorException
+            throws ComponentLookupException
     {
         ArtifactHandlerManager artifactHandlerManager = container.lookup( ArtifactHandlerManager.class );
 
         RepositorySystem m31RepositorySystem = container.lookup( RepositorySystem.class );
 
-        RepositorySystemSession session = Invoker.invoke( buildingRequest, "getRepositorySession" );
+        List<RemoteRepository> aetherRepositories = RepositoryUtils.toRepos( buildingRequest.getRemoteRepositories() );
 
-        List<RemoteRepository> aetherRepositories = Invoker.invoke(
-                RepositoryUtils.class, "toRepos", List.class, buildingRequest.getRemoteRepositories() );
-
-        return new Maven31DependencyCollector( m31RepositorySystem, artifactHandlerManager, session,
-                aetherRepositories );
+        return new Maven31DependencyCollector( m31RepositorySystem, artifactHandlerManager,
+                buildingRequest.getRepositorySession(), aetherRepositories );
 
     }
 
