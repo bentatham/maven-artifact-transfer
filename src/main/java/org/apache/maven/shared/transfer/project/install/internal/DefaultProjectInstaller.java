@@ -79,13 +79,14 @@ class DefaultProjectInstaller
         List<Artifact> attachedArtifacts = project.getAttachedArtifacts();
 
         // TODO: push into transformation
-        boolean isPomArtifact = "pom".equals( packaging );
+        boolean isPomPackaging = "pom".equals( packaging );
+        boolean isPomArtifact = artifact.getType().equals( "pom" );
 
         ProjectArtifactMetadata metadata;
 
         Collection<File> metadataFiles = new LinkedHashSet<>();
 
-        if ( isPomArtifact )
+        if ( isPomPackaging )
         {
             if ( pomFile != null )
             {
@@ -93,6 +94,12 @@ class DefaultProjectInstaller
                                    Collections.<Artifact>singletonList( new ProjectArtifact( project ) ) );
                 addMetaDataFilesForArtifact( buildingRequest, artifact, metadataFiles );
             }
+        }
+        else if ( isPomArtifact && attachedArtifacts.isEmpty() )
+        {
+            installer.install( buildingRequest,
+                               Collections.<Artifact>singletonList( artifact ) );
+            addMetaDataFilesForArtifact( buildingRequest, artifact, metadataFiles );
         }
         else
         {
